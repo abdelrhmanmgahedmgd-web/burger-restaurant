@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kitchen Dashboard - Live Orders</title>
+    <link rel="preconnect" href="https:">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="kitchen.css">
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <div class="header">
+            <h1>🍔 Kitchen Live Orders</h1>
+            <button onclick="loadOrders()" class="refresh-btn">🔄 Refresh Orders</button>
+        </div>
+
+        <div class="orders-grid" id="orders-container">
+            <p class="loading-text">Loading incoming orders...</p>
+        </div>
+    </div>
+
+    <script>
+        
+        function loadOrders() {
+            const container = document.getElementById("orders-container");
+
+             fetch('http://localhost:5000/api/orders')
+                .then(response => response.json())
+                .then(orders => {
+                    container.innerHTML = ""; 
+
+                    if (orders.length === 0) {
+                        container.innerHTML = `<div class="no-orders">No orders yet. Keep waiting! 🕒</div>`;
+                        return;
+                    }
+
+                    
+                    orders.forEach(order => {
+                        const orderDate = new Date(order.orderDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                        
+                        const orderCard = `
+                            <div class="order-card">
+                                <div class="card-header">
+                                    <span class="order-id">Order #${order.id}</span>
+                                    <span class="order-time">${orderDate}</span>
+                                </div>
+                                <div class="card-body">
+                                    <h3>🍔 ${order.itemName}</h3>
+                                    <p class="customer-name">👤 ${order.customerName}</p>
+                                    <p class="customer-phone">📞 ${order.phone}</p>
+                                    <p class="order-price">💰 ${order.price} EGP</p>
+                                </div>
+                                <div class="card-footer">
+                                    <button class="done-btn" onclick="completeOrder(${order.id})">Done ✔</button>
+                                </div>
+                            </div>
+                        `;
+                        container.insertAdjacentHTML('beforeend', orderCard);
+                    });
+                })
+                .catch(error => {
+                    console.error("Error loading orders:", error);
+                    container.innerHTML = `<p style="color: #ff4444;">Could not connect to server. Make sure .NET is running!</p>`;
+                });
+        }
+        function completeOrder(orderId) {
+    fetch(`http://localhost:5000/api/orders/${orderId}`, {
+        method: 'DELETE'
+    })
+    .then(response => {
+        if (response.ok) {
+            loadOrders(); 
+        } else {
+            alert("فشل مسح الأوردر من السيرفر.");
+        }
+    })
+    .catch(err => console.error("خطأ في الاتصال بالسيرفر:", err));
+}
+
+        
+        loadOrders();
+        
+        
+        setInterval(loadOrders, 10000);
+    </script>
+</body>
+</html>
