@@ -68,7 +68,7 @@
                 });
         }
         function completeOrder(orderId) {
-    fetch(`http://localhost:5000/api/orders/${orderId}`, {
+    fetch('https://burger-restaurant-backend-production.up.railway.app/api/orders', {
         method: 'DELETE'
     })
     .then(response => {
