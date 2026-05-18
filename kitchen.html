@@ -28,7 +28,7 @@
         function loadOrders() {
             const container = document.getElementById("orders-container");
 
-             fetch('http://localhost:5000/api/orders')
+            fetch('https://burger-restaurant-backend-production.up.railway.app/api/orders', {
                 .then(response => response.json())
                 .then(orders => {
                     container.innerHTML = ""; 
