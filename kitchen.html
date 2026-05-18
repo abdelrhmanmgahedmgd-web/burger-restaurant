@@ -10,57 +10,48 @@
     <link rel="stylesheet" href="kitchen.css">
 </head>
 <body>
-
     <div class="dashboard-container">
         <div class="header">
             <h1>🍔 Kitchen Live Orders</h1>
             <button onclick="loadOrders()" class="refresh-btn">🔄 Refresh Orders</button>
         </div>
-
         <div class="orders-grid" id="orders-container">
             <p class="loading-text">Loading incoming orders...</p>
         </div>
     </div>
-
     <script>
         function loadOrders() {
             const container = document.getElementById("orders-container");
             if (!container) return;
-
             fetch('https://burger-restaurant-backend-production.up.railway.app/api/orders')
                 .then(response => response.json())
                 .then(orders => {
                     container.innerHTML = ""; 
-
                     if (!orders || !Array.isArray(orders) || orders.length === 0) {
                         container.innerHTML = `<div class="no-orders">No orders yet. Keep waiting! 🕒</div>`;
                         return;
                     }
-
-                    orders.forEach(order => {
-                        const id = order.id || order.Id;
-                        const rawDate = order.orderDate || order.OrderDate;
-                        const orderTime = rawDate ? new Date(rawDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '🕒';
-                        
-                        const itemName = order.itemName || order.ItemName || 'Unknown Item';
-                        const customerName = order.customerName || order.CustomerName || 'Guest';
-                        const phone = order.phone || order.Phone || 'N/A';
-                        const price = order.price || order.Price || 0;
-
+                    const kitchenOrders = orders.filter(o => !o.isReady);
+                    if (kitchenOrders.length === 0) {
+                        container.innerHTML = `<div class="no-orders">No orders yet. Keep waiting! 🕒</div>`;
+                        return;
+                    }
+                    kitchenOrders.forEach(order => {
+                        const orderTime = order.orderDate ? new Date(order.orderDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '🕒';
                         const orderCard = `
                             <div class="order-card">
                                 <div class="card-header">
-                                    <span class="order-id">Order #${id}</span>
+                                    <span class="order-id">Order #${order.id}</span>
                                     <span class="order-time">${orderTime}</span>
                                 </div>
                                 <div class="card-body">
-                                    <h3>🍔 ${itemName}</h3>
-                                    <p class="customer-name">👤 ${customerName}</p>
-                                    <p class="customer-phone">📞 ${phone}</p>
-                                    <p class="order-price">💰 ${price} EGP</p>
+                                    <h3>🍔 ${order.itemName}</h3>
+                                    <p class="customer-name">👤 ${order.customerName}</p>
+                                    <p class="customer-phone">📞 ${order.phone}</p>
+                                    <p class="order-price">💰 ${order.price} EGP</p>
                                 </div>
                                 <div class="card-footer">
-                                    <button class="done-btn" onclick="completeOrder(${id})">Done ✔</button>
+                                    <button class="done-btn" onclick="markOrderAsReady(${order.id})">Done ✔</button>
                                 </div>
                             </div>
                         `;
@@ -68,28 +59,26 @@
                     });
                 })
                 .catch(error => {
-                    console.error("Error loading orders:", error);
-                    container.innerHTML = `<p style="color: #ff4444;">Could not connect to server. Make sure .NET is running!</p>`;
+                    console.error("Error:", error);
+                    container.innerHTML = `<p style="color: #ff4444;">Could not connect to server.</p>`;
                 });
         }
-
-        function completeOrder(orderId) {
+        function markOrderAsReady(orderId) {
             if (!orderId) return;
-            fetch(`https://burger-restaurant-backend-production.up.railway.app/api/orders/${orderId}`, {
-                method: 'DELETE'
+            fetch(`https://burger-restaurant-backend-production.up.railway.app/api/orders/${orderId}/ready`, {
+                method: 'PUT'
             })
             .then(response => {
                 if (response.ok) {
                     loadOrders(); 
                 } else {
-                    alert("فشل مسح الأوردر من السيرفر.");
+                    alert("Failed to update kitchen status.");
                 }
             })
-            .catch(err => console.error("خطأ في الاتصال بالسيرفر:", err));
+            .catch(err => console.error("Error:", err));
         }
-
         loadOrders();
-        setInterval(loadOrders, 10000);
+        setInterval(loadOrders, 5000);
     </script>
 </body>
 </html>
