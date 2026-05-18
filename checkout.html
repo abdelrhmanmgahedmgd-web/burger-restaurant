@@ -112,14 +112,13 @@
         const name = document.getElementById("customer-name").value;
         const phone = document.getElementById("customer-phone").value;
 
-        // هندسة البنية هنا عشان تطابق الـ .NET والـ Kitchen بالظبط
         const orderData = {
-            customerName: name,
-            phoneNumber: phone,
-            items: cart.map(item => ({
-                name: item.name,
-                price: item.price,
-                quantity: 1 // طالما السلة بتضيف الفردي، بنثبت الكمية مؤقتاً بـ 1 أو حسب حسابات سلتك
+            CustomerName: name,
+            PhoneNumber: phone,
+            Items: cart.map(item => ({
+                Name: item.name,
+                Price: item.price,
+                Quantity: 1 
             })),
             totalPrice: totalPrice       
         };
