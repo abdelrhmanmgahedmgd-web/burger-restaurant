@@ -108,12 +108,13 @@
 
     
   document.getElementById("checkout-form").addEventListener("submit", (e) => {
-        e.preventDefault(); // منع الصفحة من الريفريش
+        e.preventDefault(); 
         
         const name = document.getElementById("customer-name").value;
         const phone = document.getElementById("customer-phone").value;
 
-        // هنرجع للشكل القديم اللي السيرفر مخزن على أساسه الأوردرات القديمة بنجاح
+        const allItemsNames = cart.map(item => item.name).join(" + ");
+
         const orderData = {
             CustomerName: name,
             Phone: phone,
@@ -132,21 +133,18 @@
             if (response.ok) {
                 console.log("Order sent successfully!");
                 localStorage.removeItem("cart"); 
-                window.location.href = "success.html"; // مش هيحول إلا لو نجح (200 OK)
+                window.location.href = "success.html"; 
             } else {
-                // لو السيرفر رفض الداتا (مثلاً 400 Bad Request) هيطلع الرسالة دي ومش هيحول
                 return response.text().then(text => {
                     alert(`السيرفر رفض الطلب: ${response.status} - ${text}`);
                 });
             }
         })
         .catch(error => {
-            // لو اللينك غلط أو السيرفر واقع تماماً هيقف هنا ومش هيحول
             console.error("Error sending order:", error);
             alert("فشل الاتصال بالسيرفر! بص على الكونسول.");
         });
     });
-
         fetch('https://burger-restaurant-backend-production.up.railway.app/api/orders', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
