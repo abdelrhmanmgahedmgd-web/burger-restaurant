@@ -69,20 +69,19 @@
             container.innerHTML = `<p style="color: #ff4444;">Could not connect to server. Make sure API is running!</p>`;
         });
 }
-        function completeOrder(orderId) {
-    fetch('https://burger-restaurant-backend-production.up.railway.app/api/orders', {
+     function completeOrder(orderId) {
+    fetch(`https://burger-restaurant-backend-production.up.railway.app/api/orders/${orderId}`, {
         method: 'DELETE'
     })
     .then(response => {
         if (response.ok) {
-            loadOrders(); 
+            loadOrders();
         } else {
             alert("فشل مسح الأوردر من السيرفر.");
         }
     })
     .catch(err => console.error("خطأ في الاتصال بالسيرفر:", err));
 }
-
         
         loadOrders();
         
