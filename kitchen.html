@@ -25,47 +25,50 @@
 
     <script>
         
-        function loadOrders() {
-            const container = document.getElementById("orders-container");
+       function loadOrders() {
+    const container = document.getElementById("orders-container");
+    if (!container) return;
 
-           fetch('https://burger-restaurant-backend-production.up.railway.app/api/orders')
-    .then(response => response.json())
-    .then(orders => {
-        container.innerHTML = ""; 
+    fetch('https://burger-restaurant-backend-production.up.railway.app/api/orders')
+        .then(response => response.json())
+        .then(orders => {
+            container.innerHTML = ""; 
 
-        if (orders.length === 0) {
-            container.innerHTML = `<div class="no-orders">No orders yet. Keep waiting! 🕒</div>`;
-            return;
-        }
-                    
-                    orders.forEach(order => {
-                        const orderDate = new Date(order.orderDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                        
-                        const orderCard = `
-                            <div class="order-card">
-                                <div class="card-header">
-                                    <span class="order-id">Order #${order.id}</span>
-                                    <span class="order-time">${orderDate}</span>
-                                </div>
-                                <div class="card-body">
-                                    <h3>🍔 ${order.itemName}</h3>
-                                    <p class="customer-name">👤 ${order.customerName}</p>
-                                    <p class="customer-phone">📞 ${order.phone}</p>
-                                    <p class="order-price">💰 ${order.price} EGP</p>
-                                </div>
-                                <div class="card-footer">
-                                    <button class="done-btn" onclick="completeOrder(${order.id})">Done ✔</button>
-                                </div>
-                            </div>
-                        `;
-                        container.insertAdjacentHTML('beforeend', orderCard);
-                    });
-                })
-                .catch(error => {
-                    console.error("Error loading orders:", error);
-                    container.innerHTML = `<p style="color: #ff4444;">Could not connect to server. Make sure .NET is running!</p>`;
-                });
-        }
+            if (orders.length === 0) {
+                container.innerHTML = `<div class="no-orders">No orders yet. Keep waiting! 🕒</div>`;
+                return;
+            }
+
+            orders.forEach(order => {
+                const orderCard = `
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Order #${order.id}</h3>
+                            <span class="status">Incoming</span>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Customer:</strong> ${order.customerName}</p>
+                            <p><strong>Phone:</strong> ${order.phoneNumber}</p>
+                            <hr>
+                            <ul>
+                                ${order.items.map(item => `<li>${item.name} x${item.quantity} - ${item.price} LE</li>`).join('')}
+                            </ul>
+                            <hr>
+                            <p class="total"><strong>Total:</strong> ${order.totalPrice} LE</p>
+                        </div>
+                        <div class="card-footer">
+                            <button class="done-btn" onclick="completeOrder(${order.id})">Done ✓</button>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', orderCard);
+            });
+        })
+        .catch(error => {
+            console.error("Error loading orders:", error);
+            container.innerHTML = `<p style="color: #ff4444;">Could not connect to server. Make sure API is running!</p>`;
+        });
+}
         function completeOrder(orderId) {
     fetch('https://burger-restaurant-backend-production.up.railway.app/api/orders', {
         method: 'DELETE'
