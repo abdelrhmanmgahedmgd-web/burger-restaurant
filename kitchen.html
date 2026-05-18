@@ -28,16 +28,15 @@
         function loadOrders() {
             const container = document.getElementById("orders-container");
 
-            fetch('https://burger-restaurant-backend-production.up.railway.app/api/orders', {
-                .then(response => response.json())
-                .then(orders => {
-                    container.innerHTML = ""; 
+           fetch('https://burger-restaurant-backend-production.up.railway.app/api/orders')
+    .then(response => response.json())
+    .then(orders => {
+        container.innerHTML = ""; 
 
-                    if (orders.length === 0) {
-                        container.innerHTML = `<div class="no-orders">No orders yet. Keep waiting! 🕒</div>`;
-                        return;
-                    }
-
+        if (orders.length === 0) {
+            container.innerHTML = `<div class="no-orders">No orders yet. Keep waiting! 🕒</div>`;
+            return;
+        }
                     
                     orders.forEach(order => {
                         const orderDate = new Date(order.orderDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
