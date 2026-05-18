@@ -31,16 +31,16 @@
         .status-badge.pending { background-color: rgba(255, 204, 0, 0.2); color: #ffcc00; }
         .status-badge.ready { background-color: rgba(46, 204, 113, 0.2); color: #2ecc71; }
         .no-orders { text-align: center; color: #666; margin: auto; font-style: italic; }
+        .deliver-btn { background-color: #2ecc71; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: 600; margin-top: 12px; width: 100%; transition: 0.3s; }
+        .deliver-btn:hover { background-color: #27ae60; }
     </style>
 </head>
 <body>
-
     <div class="dashboard-container">
         <div class="header">
             <h1>📋 Cashier Live Monitor</h1>
             <button onclick="loadCashierOrders()" class="refresh-btn">🔄 Update Monitor</button>
         </div>
-
         <div class="cashier-grid">
             <div>
                 <h2 class="section-title pending-title">⏳ In the Kitchen</h2>
@@ -48,7 +48,6 @@
                     <p class="no-orders">Loading orders...</p>
                 </div>
             </div>
-
             <div>
                 <h2 class="section-title ready-title">🛍️ Ready for Pickup</h2>
                 <div class="orders-list" id="ready-orders">
@@ -57,55 +56,43 @@
             </div>
         </div>
     </div>
-
     <script>
         function loadCashierOrders() {
             const kitchenContainer = document.getElementById("kitchen-orders");
             const readyContainer = document.getElementById("ready-orders");
-
             fetch('https://burger-restaurant-backend-production.up.railway.app/api/orders')
                 .then(response => response.json())
                 .then(orders => {
                     kitchenContainer.innerHTML = "";
                     readyContainer.innerHTML = "";
-
                     let kitchenCount = 0;
                     let readyCount = 0;
-
                     if (!orders || !Array.isArray(orders) || orders.length === 0) {
                         kitchenContainer.innerHTML = `<div class="no-orders">No active orders 🕒</div>`;
                         readyContainer.innerHTML = `<div class="no-orders">No orders waiting 🕒</div>`;
                         return;
                     }
-
                     orders.forEach(order => {
-                        const id = order.id || order.Id;
-                        const rawDate = order.orderDate || order.OrderDate;
-                        const orderTime = rawDate ? new Date(rawDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '🕒';
-                        const itemName = order.itemName || order.ItemName || 'Unknown Item';
-                        const customerName = order.customerName || order.CustomerName || 'Guest';
-                        const phone = order.phone || order.Phone || 'N/A';
-                        const price = order.price || order.Price || 0;
-                        const isReady = order.isReady || order.IsReady || false; 
-
+                        const orderTime = order.orderDate ? new Date(order.orderDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '🕒';
+                        const isReady = order.isReady || false;
                         const cardHTML = `
                             <div class="order-card ${isReady ? 'ready' : ''}">
                                 <div class="card-header">
-                                    <span class="order-id">Order #${id}</span>
+                                    <span class="order-id">Order #${order.id}</span>
                                     <span class="order-time">${orderTime}</span>
                                 </div>
                                 <div class="card-body">
-                                    <h3>🍔 ${itemName}</h3>
-                                    <p class="customer-info">👤 <strong>Name:</strong> ${customerName}</p>
-                                    <p class="customer-info">📞 <strong>Phone:</strong> ${phone}</p>
+                                    <h3>🍔 ${order.itemName}</h3>
+                                    <p class="customer-info">👤 <strong>Name:</strong> ${order.customerName}</p>
+                                    <p class="customer-info">📞 <strong>Phone:</strong> ${order.phone}</p>
                                     <div class="card-header" style="padding:0; margin-top:10px;">
-                                        <span class="order-price">💰 ${price} EGP</span>
+                                        <span class="order-price">💰 ${order.price} EGP</span>
                                         <span class="status-badge ${isReady ? 'ready' : 'pending'}">${isReady ? 'Ready' : 'In Kitchen'}</span>
                                     </div>
+                                    ${isReady ? `<button class="deliver-btn" onclick="archiveOrder(${order.id})">Deliver & Archive 📦</button>` : ''}
                                 </div>
                             </div>
                         `;
-
                         if (isReady) {
                             readyContainer.insertAdjacentHTML('beforeend', cardHTML);
                             readyCount++;
@@ -114,18 +101,30 @@
                             kitchenCount++;
                         }
                     });
-
                     if (kitchenCount === 0) kitchenContainer.innerHTML = `<div class="no-orders">Kitchen is clear! 🎉</div>`;
                     if (readyCount === 0) readyContainer.innerHTML = `<div class="no-orders">No orders waiting for pickup.</div>`;
                 })
                 .catch(error => {
-                    console.error("Error loading cashier orders:", error);
+                    console.error("Error:", error);
                     kitchenContainer.innerHTML = `<p style="color: #ff4444;">Server error.</p>`;
                 });
         }
-
+        function archiveOrder(orderId) {
+            if (!orderId) return;
+            fetch(`https://burger-restaurant-backend-production.up.railway.app/api/orders/${orderId}`, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (response.ok) {
+                    loadCashierOrders(); 
+                } else {
+                    alert("Failed to archive order.");
+                }
+            })
+            .catch(err => console.error("Error:", err));
+        }
         loadCashierOrders();
-        setInterval(loadCashierOrders, 10000);
+        setInterval(loadCashierOrders, 5000);
     </script>
 </body>
 </html>
