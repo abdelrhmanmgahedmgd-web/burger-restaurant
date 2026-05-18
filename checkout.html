@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout - Confirm Order</title>
-   <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="checkout.css">
@@ -12,7 +12,6 @@
 <body>
 
     <div class="checkout-container">
-        
         <div class="summary-section">
             <h2>Your Order</h2>
             <div class="order-summary-card">
@@ -28,43 +27,34 @@
         <div class="form-section">
             <h2>Customer Details</h2>
             <form id="checkout-form">
-                
                 <div class="input-group">
-                    <label for="customer-name">Full Name</label>
+                    <label for="Customer-name">Full Name</label>
                     <input type="text" id="Customer-name" placeholder="Enter your full name" required>
                 </div>
 
                 <div class="input-group">
-                    <label for="customer-phone">Phone Number</label>
+                    <label for="Customer-phone">Phone Number</label>
                     <input type="tel" id="Customer-phone" placeholder="Enter your phone number" required>
                 </div>
 
                 <div class="payment-section">
                     <h3>Payment Method</h3>
-                    
                     <div class="payment-options">
                         <label class="payment-option">
                             <input type="radio" name="payment" value="Cash" checked>
-                            <span class="custom-radio"></span>
-                            Cash 
+                            <span class="custom-radio"></span> Cash 
                         </label>
-
                         <label class="payment-option">
                             <input type="radio" name="payment" value="Visa">
-                            <span class="custom-radio"></span>
-                            Visa / Mastercard
+                            <span class="custom-radio"></span> Visa / Mastercard
                         </label>
-
                         <label class="payment-option">
                             <input type="radio" name="payment" value="Wallet">
-                            <span class="custom-radio"></span>
-                             Smart Wallet
+                            <span class="custom-radio"></span> Smart Wallet
                         </label>
-
                         <label class="payment-option">
                             <input type="radio" name="payment" value="InstaPay">
-                            <span class="custom-radio"></span>
-                            InstaPay
+                            <span class="custom-radio"></span> InstaPay
                         </label>
                     </div>
                 </div>
@@ -72,99 +62,71 @@
                 <button type="submit" class="confirm-btn">Confirm Order</button>
             </form>
         </div>
-
     </div>
 
-  <script>
-    const cart = JSON.parse(localStorage.getItem("cart")) || [];
-    const summaryCardContainer = document.querySelector(".summary-section");
+    <script>
+        const cart = JSON.parse(localStorage.getItem("cart")) || [];
+        const summaryCardContainer = document.querySelector(".summary-section");
 
-    if (cart.length === 0) {
-        alert("سلتك فاضية! روح املأها برجر الأول 🍔");
-        window.location.href = "Minu.Resturant.html"; 
-    }
+        if (cart.length === 0) {
+            alert("سلتك فاضية! روح املأها برجر الأول 🍔");
+            window.location.href = "Minu.Resturant.html"; 
+        }
 
-    const headingHTML = `<h2>Your Order</h2>`;
-    const backBtnHTML = `<a href="Minu.Resturant.html" class="back-btn">← Back to Menu</a>`;
-    let itemsHTML = "";
-    let totalPrice = 0;
+        const headingHTML = `<h2>Your Order</h2>`;
+        const backBtnHTML = `<a href="Minu.Resturant.html" class="back-btn">← Back to Menu</a>`;
+        let itemsHTML = "";
+        let totalPrice = 0;
 
-    
-    cart.forEach(item => {
-        totalPrice += item.price;
-        itemsHTML += `
-            <div class="order-summary-card" style="margin-bottom: 15px;">
-                <img src="${item.image}" alt="${item.name}">
-                <div class="summary-info">
-                    <h3>${item.name}</h3>
-                    <p>${item.price} EGP</p>
+        cart.forEach(item => {
+            totalPrice += item.price;
+            itemsHTML += `
+                <div class="order-summary-card" style="margin-bottom: 15px;">
+                    <img src="${item.image}" alt="${item.name}">
+                    <div class="summary-info">
+                        <h3>${item.name}</h3>
+                        <p>${item.price} EGP</p>
+                    </div>
                 </div>
-            </div>
-        `;
-    });
-
-    const totalHTML = `<div style="font-size: 24px; color: #ff6b1a; font-weight:700; margin: 20px 0;">Total: ${totalPrice} EGP</div>`;
-    summaryCardContainer.innerHTML = headingHTML + itemsHTML + totalHTML + backBtnHTML;
-
-    
-  document.getElementById("checkout-form").addEventListener("submit", (e) => {
-        e.preventDefault(); 
-        
-        const name = document.getElementById("Customer-name").value;
-        const phone = document.getElementById("Customer-phone").value;
-
-        const allItemsNames = cart.map(item => item.name).join(" + ");
-
-        const orderData = {
-            CustomerName: name,
-            Phone: phone,
-            ItemName: allItemsNames, 
-            Price: totalPrice        
-        };
-
-        console.log("Sending order data...", orderData);
-
-        fetch('https://burger-restaurant-backend-production.up.railway.app/api/orders', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(orderData)
-        })
-        .then(response => {
-            if (response.ok) {
-                console.log("Order sent successfully!");
-                localStorage.removeItem("cart"); 
-                window.location.href = "success.html"; 
-            } else {
-                return response.text().then(text => {
-                    alert(`السيرفر رفض الطلب: ${response.status} - ${text}`);
-                });
-            }
-        })
-        .catch(error => {
-            console.error("Error sending order:", error);
-            alert("فشل الاتصال بالسيرفر! بص على الكونسول.");
+            `;
         });
-    });
-        fetch('https://burger-restaurant-backend-production.up.railway.app/api/orders', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(orderData)
-        })
-        .then(response => {
-            if (response.ok) {
-                localStorage.removeItem("cart"); 
-                window.location.href = "success.html"; 
-            } else {
-                alert("حصلت مشكلة أثناء إرسال الطلب، جرب تاني!");
-            }
-        })
-        .catch(error => {
-            console.error("Error sending order:", error);
-            localStorage.removeItem("cart");
-            window.location.href = "success.html";
-        });
-    });
-</script>
 
+        const totalHTML = `<div style="font-size: 24px; color: #ff6b1a; font-weight:700; margin: 20px 0;">Total: ${totalPrice} EGP</div>`;
+        summaryCardContainer.innerHTML = headingHTML + itemsHTML + totalHTML + backBtnHTML;
+
+        document.getElementById("checkout-form").addEventListener("submit", (e) => {
+            e.preventDefault(); 
+            const name = document.getElementById("Customer-name").value;
+            const phone = document.getElementById("Customer-phone").value;
+            const allItemsNames = cart.map(item => item.name).join(" + ");
+
+            const orderData = {
+                CustomerName: name,
+                Phone: phone,
+                ItemName: allItemsNames, 
+                Price: totalPrice        
+            };
+
+            fetch('https://burger-restaurant-backend-production.up.railway.app/api/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(orderData)
+            })
+            .then(response => {
+                if (response.ok) {
+                    localStorage.removeItem("cart"); 
+                    window.location.href = "success.html"; 
+                } else {
+                    return response.text().then(text => {
+                        alert(`السيرفر رفض الطلب: ${response.status} - ${text}`);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Error sending order:", error);
+                alert("فشل الاتصال بالسيرفر!");
+            });
+        });
+    </script>
 </body>
 </html>
