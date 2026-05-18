@@ -6,7 +6,7 @@
 
 body {
     font-family: 'Poppins', sans-serif;
-    background: url("bgg.jpg") no-repeat center center fixed;
+    background: url("bgg.jpg?v=2") no-repeat center center fixed;
     background-size: cover;
     color: white;
     min-height: 100vh;
