@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cashier Dashboard - Order Monitor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+        body { background-color: #121212; color: #fff; padding: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid #ff6b1a; padding-bottom: 15px; }
+        .header h1 { color: #ff6b1a; font-size: 28px; }
+        .refresh-btn { background-color: #ff6b1a; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: 600; transition: 0.3s; }
+        .refresh-btn:hover { background-color: #e05613; }
+        .cashier-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        .section-title { font-size: 22px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #333; padding-bottom: 8px; }
+        .pending-title { color: #ffcc00; }
+        .ready-title { color: #2ecc71; }
+        .orders-list { display: flex; flex-direction: column; gap: 15px; min-height: 400px; background: #1a1a1a; padding: 15px; border-radius: 8px; border: 1px solid #222; }
+        .order-card { background-color: #262626; border-radius: 8px; padding: 15px; border-left: 5px solid #ffcc00; box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: 0.3s; }
+        .order-card.ready { border-left-color: #2ecc71; background-color: #1e2d24; opacity: 0.9; }
+        .card-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; color: #aaa; }
+        .order-id { font-weight: 700; color: #fff; }
+        .card-body h3 { font-size: 18px; margin-bottom: 8px; color: #ff6b1a; }
+        .order-card.ready .card-body h3 { color: #2ecc71; }
+        .customer-info { font-size: 14px; margin-bottom: 5px; color: #ddd; }
+        .order-price { font-weight: 700; color: #fff; margin-top: 8px; font-size: 16px; }
+        .status-badge { padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+        .status-badge.pending { background-color: rgba(255, 204, 0, 0.2); color: #ffcc00; }
+        .status-badge.ready { background-color: rgba(46, 204, 113, 0.2); color: #2ecc71; }
+        .no-orders { text-align: center; color: #666; margin: auto; font-style: italic; }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <div class="header">
+            <h1>📋 Cashier Live Monitor</h1>
+            <button onclick="loadCashierOrders()" class="refresh-btn">🔄 Update Monitor</button>
+        </div>
+
+        <div class="cashier-grid">
+            <div>
+                <h2 class="section-title pending-title">⏳ In the Kitchen</h2>
+                <div class="orders-list" id="kitchen-orders">
+                    <p class="no-orders">Loading orders...</p>
+                </div>
+            </div>
+
+            <div>
+                <h2 class="section-title ready-title">🛍️ Ready for Pickup</h2>
+                <div class="orders-list" id="ready-orders">
+                    <p class="no-orders">No orders ready yet.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function loadCashierOrders() {
+            const kitchenContainer = document.getElementById("kitchen-orders");
+            const readyContainer = document.getElementById("ready-orders");
+
+            fetch('https://burger-restaurant-backend-production.up.railway.app/api/orders')
+                .then(response => response.json())
+                .then(orders => {
+                    kitchenContainer.innerHTML = "";
+                    readyContainer.innerHTML = "";
+
+                    let kitchenCount = 0;
+                    let readyCount = 0;
+
+                    if (!orders || !Array.isArray(orders) || orders.length === 0) {
+                        kitchenContainer.innerHTML = `<div class="no-orders">No active orders 🕒</div>`;
+                        readyContainer.innerHTML = `<div class="no-orders">No orders waiting 🕒</div>`;
+                        return;
+                    }
+
+                    orders.forEach(order => {
+                        const id = order.id || order.Id;
+                        const rawDate = order.orderDate || order.OrderDate;
+                        const orderTime = rawDate ? new Date(rawDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '🕒';
+                        const itemName = order.itemName || order.ItemName || 'Unknown Item';
+                        const customerName = order.customerName || order.CustomerName || 'Guest';
+                        const phone = order.phone || order.Phone || 'N/A';
+                        const price = order.price || order.Price || 0;
+                        const isReady = order.isReady || order.IsReady || false; 
+
+                        const cardHTML = `
+                            <div class="order-card ${isReady ? 'ready' : ''}">
+                                <div class="card-header">
+                                    <span class="order-id">Order #${id}</span>
+                                    <span class="order-time">${orderTime}</span>
+                                </div>
+                                <div class="card-body">
+                                    <h3>🍔 ${itemName}</h3>
+                                    <p class="customer-info">👤 <strong>Name:</strong> ${customerName}</p>
+                                    <p class="customer-info">📞 <strong>Phone:</strong> ${phone}</p>
+                                    <div class="card-header" style="padding:0; margin-top:10px;">
+                                        <span class="order-price">💰 ${price} EGP</span>
+                                        <span class="status-badge ${isReady ? 'ready' : 'pending'}">${isReady ? 'Ready' : 'In Kitchen'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+
+                        if (isReady) {
+                            readyContainer.insertAdjacentHTML('beforeend', cardHTML);
+                            readyCount++;
+                        } else {
+                            kitchenContainer.insertAdjacentHTML('beforeend', cardHTML);
+                            kitchenCount++;
+                        }
+                    });
+
+                    if (kitchenCount === 0) kitchenContainer.innerHTML = `<div class="no-orders">Kitchen is clear! 🎉</div>`;
+                    if (readyCount === 0) readyContainer.innerHTML = `<div class="no-orders">No orders waiting for pickup.</div>`;
+                })
+                .catch(error => {
+                    console.error("Error loading cashier orders:", error);
+                    kitchenContainer.innerHTML = `<p style="color: #ff4444;">Server error.</p>`;
+                });
+        }
+
+        loadCashierOrders();
+        setInterval(loadCashierOrders, 10000);
+    </script>
+</body>
+</html>
