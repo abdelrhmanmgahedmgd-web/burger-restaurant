@@ -112,16 +112,25 @@
         const name = document.getElementById("customer-name").value;
         const phone = document.getElementById("customer-phone").value;
 
-        const orderData = {
-            CustomerName: name,
-            PhoneNumber: phone,
-            Items: cart.map(item => ({
-                Name: item.name,
-                Price: item.price,
-                Quantity: 1 
-            })),
-            totalPrice: totalPrice       
-        };
+  const orderData = {
+    customerName: name,
+    CustomerName: name,
+
+    phone: phone,
+    Phone: phone,
+    phoneNumber: phone,
+    PhoneNumber: phone,
+
+    itemName: allItemsNames,
+    ItemName: allItemsNames,
+    items: cart.map(item => ({ name: item.name, price: item.price, quantity: 1 })),
+    Items: cart.map(item => ({ Name: item.name, Price: item.price, Quantity: 1 })),
+
+    price: totalPrice,
+    Price: totalPrice,
+    totalPrice: totalPrice,
+    TotalPrice: totalPrice
+};
 
         fetch('https://burger-restaurant-backend-production.up.railway.app/api/orders', {
             method: 'POST',
