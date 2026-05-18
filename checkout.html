@@ -111,23 +111,31 @@
         e.preventDefault();
         const name = document.getElementById("customer-name").value;
         const phone = document.getElementById("customer-phone").value;
-        const allItemsNames = cart.map(item => item.name).join(" + ");
 
+        // هندسة البنية هنا عشان تطابق الـ .NET والـ Kitchen بالظبط
         const orderData = {
-            CustomerName: name,
-            Phone: phone,
-            ItemName: allItemsNames, 
-            Price: totalPrice       
+            customerName: name,
+            phoneNumber: phone,
+            items: cart.map(item => ({
+                name: item.name,
+                price: item.price,
+                quantity: 1 // طالما السلة بتضيف الفردي، بنثبت الكمية مؤقتاً بـ 1 أو حسب حسابات سلتك
+            })),
+            totalPrice: totalPrice       
         };
 
-         fetch('https://burger-restaurant-backend-production.up.railway.app/api/orders', {
+        fetch('https://burger-restaurant-backend-production.up.railway.app/api/orders', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(orderData)
         })
         .then(response => {
-            localStorage.removeItem("cart"); 
-            window.location.href = "success.html"; 
+            if (response.ok) {
+                localStorage.removeItem("cart"); 
+                window.location.href = "success.html"; 
+            } else {
+                alert("حصلت مشكلة أثناء إرسال الطلب، جرب تاني!");
+            }
         })
         .catch(error => {
             console.error("Error sending order:", error);
