@@ -25,7 +25,7 @@
 
     <script>
         
-       function loadOrders() {
+      function loadOrders() {
     const container = document.getElementById("orders-container");
     if (!container) return;
 
@@ -34,12 +34,18 @@
         .then(orders => {
             container.innerHTML = ""; 
 
-            if (orders.length === 0) {
+            // التأكد إن الـ orders مصفوفة حقيقية ومش فاضية
+            if (!orders || !Array.isArray(orders) || orders.length === 0) {
                 container.innerHTML = `<div class="no-orders">No orders yet. Keep waiting! 🕒</div>`;
                 return;
             }
 
             orders.forEach(order => {
+                // تأمين الـ items لو مش موجودة أو فاضية عشان الـ map متضربش
+                const itemsList = order.items && Array.isArray(order.items) 
+                    ? order.items.map(item => `<li>${item.name} x${item.quantity} - ${item.price} LE</li>`).join('')
+                    : '<li>No items listed</li>';
+
                 const orderCard = `
                     <div class="card">
                         <div class="card-header">
@@ -47,14 +53,14 @@
                             <span class="status">Incoming</span>
                         </div>
                         <div class="card-body">
-                            <p><strong>Customer:</strong> ${order.customerName}</p>
-                            <p><strong>Phone:</strong> ${order.phoneNumber}</p>
+                            <p><strong>Customer:</strong> ${order.customerName || 'Unknown'}</p>
+                            <p><strong>Phone:</strong> ${order.phoneNumber || 'N/A'}</p>
                             <hr>
                             <ul>
-                                ${order.items.map(item => `<li>${item.name} x${item.quantity} - ${item.price} LE</li>`).join('')}
+                                ${itemsList}
                             </ul>
                             <hr>
-                            <p class="total"><strong>Total:</strong> ${order.totalPrice} LE</p>
+                            <p class="total"><strong>Total:</strong> ${order.totalPrice || 0} LE</p>
                         </div>
                         <div class="card-footer">
                             <button class="done-btn" onclick="completeOrder(${order.id})">Done ✓</button>
